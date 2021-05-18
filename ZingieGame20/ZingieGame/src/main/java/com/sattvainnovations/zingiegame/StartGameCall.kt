@@ -11,7 +11,6 @@ class StartGameCall {
     
     fun attachFragment(view: Context): Intent {
         val intent = Intent(view, callGame::class.java)
-
        return intent
     }
 
