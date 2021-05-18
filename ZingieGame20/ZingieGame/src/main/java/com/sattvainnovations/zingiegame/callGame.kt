@@ -12,17 +12,23 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.MutableLiveData
 import java.lang.String
 import java.util.*
 
 private var gameView: GameView? = null
 private var textViewScore: TextView? = null
 
+
 class callGame : AppCompatActivity() {
+
+    private var updateScoreMutableLiveData: MutableLiveData<Int> = MutableLiveData()
 
     private var isGameOver = false
 
     private var lives = 1
+
+    private var finalScore = 0
 
     private var isSetNewTimerThreadEnabled = false
 
@@ -91,6 +97,10 @@ class callGame : AppCompatActivity() {
     // The what values of the messages
     private val UPDATE = 0x00
     private val RESET_SCORE = 0x01
+
+    fun getScoreMutableLiveData(): MutableLiveData<Int>{
+        return this.updateScoreMutableLiveData
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,6 +200,7 @@ class callGame : AppCompatActivity() {
 
         //take the score from here
         textViewScore!!.text = ("Score: $score")
+        finalScore = finalScore.plus(score)
 
     }
 
@@ -235,6 +246,7 @@ class callGame : AppCompatActivity() {
             timer!!.cancel()
             timer!!.purge()
         }
+        updateScoreMutableLiveData.postValue(finalScore)
         isSetNewTimerThreadEnabled = false
         super.onBackPressed()
 

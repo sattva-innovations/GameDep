@@ -16,7 +16,6 @@
             </intent-filter>
         </activity>
         <activity android:name="com.sattvainnovations.zingiegame.callGame">
-
         </activity>
     </application>
 
