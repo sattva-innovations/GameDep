@@ -1,18 +1,19 @@
 package com.sattvainnovations.zingiegame
 
-import androidx.fragment.app.FragmentManager
+import android.content.Context
+import android.content.Intent
+import android.view.View
+import androidx.core.content.ContextCompat.startActivity
 
-object StartGameCall {
+
+class StartGameCall {
 
     //pass the hostId
     
-    fun attachFragment(hostId : Int){
-        val fragment = DeliveryjumpFragment()
-        val supportFragmentManager : FragmentManager ?= null
-        val fragmentTransaction = supportFragmentManager?.beginTransaction()
-        fragmentTransaction!!.replace(hostId,fragment)
-            .addToBackStack(null)
-            .commit()
+    fun attachFragment(view:Context): Intent {
+        val intent = Intent(view , callGame::class.java)
+        startActivity(view,intent,null)
+       return intent
     }
 
 }

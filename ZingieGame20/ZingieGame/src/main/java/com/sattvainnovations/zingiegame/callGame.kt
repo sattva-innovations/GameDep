@@ -6,24 +6,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.doOnTextChanged
 import java.lang.String
 import java.util.*
 
-class DeliveryjumpFragment : Fragment() {
+private var gameView: GameView? = null
+private var textViewScore: TextView? = null
 
-
-    private var gameView: GameView? = null
-    private var textViewScore: TextView? = null
-
-
+class callGame : AppCompatActivity() {
 
     private var isGameOver = false
 
@@ -44,89 +39,83 @@ class DeliveryjumpFragment : Fragment() {
     private var timer: Timer? = null
 
     private val handler: Handler =
-        object : Handler(Looper.getMainLooper()) {
-            override fun handleMessage(message: Message) {
-                when (message.what) {
-                    UPDATE -> {
-                        if (gameView!!.isAlive) {
-                            isGameOver = false
-                            gameView!!.update()
-                        } else {
-                            if (lives == 5){
-                                Toast.makeText(requireContext(),lives.toString(), Toast.LENGTH_LONG).show()
-                                onBackPressed()
-                            }
-                            if (gameMode == TOUCH_MODE) {
-                                // Cancel the timer
-                                timer!!.cancel()
-                                timer!!.purge()
-                            }
+    object : Handler(Looper.getMainLooper()) {
+        override fun handleMessage(message: Message) {
+            when (message.what) {
+                UPDATE -> {
+                    if (gameView!!.isAlive) {
+                        isGameOver = false
+                        gameView!!.update()
+                    } else {
+                        if (lives == 5){
+                            Toast.makeText(applicationContext,lives.toString(),Toast.LENGTH_LONG).show()
+                            onBackPressed()
+                        }
+                        if (gameMode == TOUCH_MODE) {
+                            // Cancel the timer
+                            timer!!.cancel()
+                            timer!!.purge()
+                        }
 
-                            alertDialog = AlertDialog.Builder(requireContext())
-                            alertDialog!!.setTitle("GAME OVER")
-                            alertDialog!!.setMessage(
-                                """
+                        alertDialog = AlertDialog.Builder(this@callGame)
+                        alertDialog!!.setTitle("GAME OVER")
+                        alertDialog!!.setMessage(
+                            """
                             Score: ${String.valueOf(gameView!!.score)}
                             Lives left: ${(5-lives)}
                             Would you like to Try Again?
                             """.trimIndent()
-                            )
-                            alertDialog!!.setCancelable(false)
-                            alertDialog!!.setPositiveButton(
-                                "YES"
-                            ) { dialog, which -> restartGame()
-                                lives += 1
+                        )
+                        alertDialog!!.setCancelable(false)
+                        alertDialog!!.setPositiveButton(
+                            "YES"
+                        ) { dialog, which -> this@callGame.restartGame()
+                            lives += 1
 
-                            }
-                            alertDialog!!.setNegativeButton(
-                                "NO"
-                            ) { dialog, which -> onBackPressed() }
-                            alertDialog!!.show()
                         }
+                        alertDialog!!.setNegativeButton(
+                            "NO"
+                        ) { dialog, which -> this@callGame.onBackPressed() }
+                        alertDialog!!.show()
                     }
-                    RESET_SCORE -> {
-                        textViewScore!!.text = "0"
-                    }
-                    else -> {
-                    }
+                }
+                RESET_SCORE -> {
+                    textViewScore!!.text = "0"
+                }
+                else -> {
                 }
             }
         }
+    }
 
     // The what values of the messages
     private val UPDATE = 0x00
     private val RESET_SCORE = 0x01
 
-
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
 
-        }
-    }
 
-    @SuppressLint("ClickableViewAccessibility")
-    @Suppress("UNREACHABLE_CODE")
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_deliveryjump, container, false)
+        setContentView(R.layout.activity_call_game)
 
 
         // Initialize the private views
         initViews()
 
         // Initialize the MediaPlayer
-        mediaPlayer = MediaPlayer.create(requireContext(), R.raw.sound_score)
+        mediaPlayer = MediaPlayer.create(this, R.raw.sound_score)
         mediaPlayer!!.isLooping = false
 
+        // Get the mode of the game from the StartingActivity
 
         // Get the mode of the game from the StartingActivity
-        gameMode = TOUCH_MODE
+        if (intent.getStringExtra("Mode") == "Touch") {
+            gameMode = TOUCH_MODE
+        }
 
 
+        // Set the Timer
 
         // Set the Timer
         isSetNewTimerThreadEnabled = true
@@ -144,22 +133,24 @@ class DeliveryjumpFragment : Fragment() {
         }
         setNewTimerThread!!.start()
 
-        // Jump listener
-        gameView!!.setOnTouchListener { view, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> gameView!!.jump()
-                MotionEvent.ACTION_UP -> {
+        if (gameMode == TOUCH_MODE) {
+            // Jump listener
+            gameView!!.setOnTouchListener { view, motionEvent ->
+                when (motionEvent.action) {
+                    MotionEvent.ACTION_DOWN -> gameView!!.jump()
+                    MotionEvent.ACTION_UP -> {
+                    }
+                    else -> {
+                    }
                 }
-
+                true
             }
-            true
         }
-
     }
 
     private fun initViews() {
-        gameView = view!!.findViewById(R.id.game_view)
-        textViewScore = view!!.findViewById(R.id.text_view_score)
+        gameView = findViewById(R.id.game_view)
+        textViewScore = findViewById(R.id.text_view_score)
     }
 
     /**
@@ -173,7 +164,7 @@ class DeliveryjumpFragment : Fragment() {
         timer!!.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 // Send the message to the handler to update the UI of the GameView
-                this@DeliveryjumpFragment.handler.sendEmptyMessage(UPDATE)
+                this@callGame.handler.sendEmptyMessage(UPDATE)
 
                 // For garbage collection
                 System.gc()
@@ -206,7 +197,7 @@ class DeliveryjumpFragment : Fragment() {
     /**
      * Plays the music for score.
      */
-    fun playScoreMusic() {
+     fun playScoreMusic() {
         if (gameMode == TOUCH_MODE) {
             mediaPlayer?.start()
         }
@@ -239,16 +230,17 @@ class DeliveryjumpFragment : Fragment() {
         }
     }
 
-    fun onBackPressed() {
+    override fun onBackPressed() {
         if (timer != null) {
             timer!!.cancel()
             timer!!.purge()
         }
-
         isSetNewTimerThreadEnabled = false
-        return super.onPause()
+        super.onBackPressed()
 
     }
+
+
 
 
 }

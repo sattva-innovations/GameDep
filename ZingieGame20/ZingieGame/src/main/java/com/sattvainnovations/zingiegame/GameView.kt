@@ -18,6 +18,7 @@ class GameView : SurfaceView, SurfaceHolder.Callback {
     private var paint: Paint? = null
     private var bitmap: Bitmap? = null
 
+
     // The current score
     var score = 0
         private set
@@ -193,9 +194,13 @@ class GameView : SurfaceView, SurfaceHolder.Callback {
                             score++
 
                             // Update the score in MainActivity
-                            val context = this
-                            (context as DeliveryjumpFragment).updateScore(score)
-                            (context as DeliveryjumpFragment).playScoreMusic()
+
+                            // Update the score in MainActivity
+                            val context = context
+                            if (context is callGame) {
+                                context.updateScore(score)
+                                context.playScoreMusic()
+                            }
                         }
                     }
                 }
