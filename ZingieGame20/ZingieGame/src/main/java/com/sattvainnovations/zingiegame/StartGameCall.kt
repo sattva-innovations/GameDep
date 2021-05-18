@@ -2,7 +2,7 @@ package com.sattvainnovations.zingiegame
 
 import androidx.fragment.app.FragmentManager
 
-class StartGameCall {
+object StartGameCall {
 
     //pass the hostId
     
