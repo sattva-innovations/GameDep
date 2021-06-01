@@ -18,17 +18,15 @@ import java.util.*
 
 private var gameView: GameView? = null
 private var textViewScore: TextView? = null
+private var scoreData :kotlin.String? = ""
 
 
 class callGame : AppCompatActivity() {
-
-    private var updateScoreMutableLiveData: MutableLiveData<Int> = MutableLiveData()
 
     private var isGameOver = false
 
     private var lives = 1
 
-    private var finalScore = 0
 
     private var isSetNewTimerThreadEnabled = false
 
@@ -54,6 +52,7 @@ class callGame : AppCompatActivity() {
                         gameView!!.update()
                     } else {
                         if (lives == 5){
+
                             Toast.makeText(applicationContext,lives.toString(),Toast.LENGTH_LONG).show()
                             onBackPressed()
                         }
@@ -81,7 +80,11 @@ class callGame : AppCompatActivity() {
                         }
                         alertDialog!!.setNegativeButton(
                             "NO"
-                        ) { dialog, which -> this@callGame.onBackPressed() }
+                        ) { dialog,
+                            which ->
+                            this@callGame.onBackPressed()
+
+                        }
                         alertDialog!!.show()
                     }
                 }
@@ -98,9 +101,6 @@ class callGame : AppCompatActivity() {
     private val UPDATE = 0x00
     private val RESET_SCORE = 0x01
 
-    fun getScoreMutableLiveData(): MutableLiveData<Int>{
-        return this.updateScoreMutableLiveData
-    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -187,6 +187,8 @@ class callGame : AppCompatActivity() {
             timer!!.cancel()
             timer!!.purge()
         }
+
+
         isSetNewTimerThreadEnabled = false
         super.onDestroy()
     }
@@ -197,11 +199,16 @@ class callGame : AppCompatActivity() {
     }
 
     fun updateScore(score: Int) {
-
         //take the score from here
-        textViewScore!!.text = ("Score: $score")
-        finalScore = finalScore.plus(score)
+        textViewScore!!.text = ("$score")
+        scoreData = score.toString()
 
+
+
+    }
+
+    fun sendScore(): kotlin.String? {
+        return scoreData
     }
 
 
@@ -246,7 +253,6 @@ class callGame : AppCompatActivity() {
             timer!!.cancel()
             timer!!.purge()
         }
-        updateScoreMutableLiveData.postValue(finalScore)
         isSetNewTimerThreadEnabled = false
         super.onBackPressed()
 
