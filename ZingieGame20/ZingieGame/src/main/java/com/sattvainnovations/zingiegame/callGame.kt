@@ -1,6 +1,9 @@
 package com.sattvainnovations.zingiegame
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.SharedPreferences
+import android.content.SharedPreferences.Editor
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -11,10 +14,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doOnTextChanged
-import androidx.lifecycle.MutableLiveData
 import java.lang.String
 import java.util.*
+
 
 private var gameView: GameView? = null
 private var textViewScore: TextView? = null
@@ -26,6 +28,8 @@ class callGame : AppCompatActivity() {
     private var isGameOver = false
 
     private var lives = 1
+
+
 
 
     private var isSetNewTimerThreadEnabled = false
@@ -51,9 +55,9 @@ class callGame : AppCompatActivity() {
                         isGameOver = false
                         gameView!!.update()
                     } else {
-                        if (lives == 5){
+                        if (lives == 5) {
 
-                            Toast.makeText(applicationContext,lives.toString(),Toast.LENGTH_LONG).show()
+                            Toast.makeText(applicationContext, lives.toString(), Toast.LENGTH_LONG).show()
                             onBackPressed()
                         }
                         if (gameMode == TOUCH_MODE) {
@@ -65,21 +69,22 @@ class callGame : AppCompatActivity() {
                         alertDialog = AlertDialog.Builder(this@callGame)
                         alertDialog!!.setTitle("GAME OVER")
                         alertDialog!!.setMessage(
-                            """
+                                """
                             Score: ${String.valueOf(gameView!!.score)}
-                            Lives left: ${(5-lives)}
+                            Lives left: ${(5 - lives)}
                             Would you like to Try Again?
                             """.trimIndent()
                         )
                         alertDialog!!.setCancelable(false)
                         alertDialog!!.setPositiveButton(
-                            "YES"
-                        ) { dialog, which -> this@callGame.restartGame()
+                                "YES"
+                        ) { dialog, which ->
+                            this@callGame.restartGame()
                             lives += 1
 
                         }
                         alertDialog!!.setNegativeButton(
-                            "NO"
+                                "NO"
                         ) { dialog,
                             which ->
                             this@callGame.onBackPressed()
@@ -202,9 +207,10 @@ class callGame : AppCompatActivity() {
         //take the score from here
         textViewScore!!.text = ("$score")
         scoreData = score.toString()
-
-
-
+        var prefs: SharedPreferences = getSharedPreferences("Score",MODE_PRIVATE)
+        val editor: Editor = prefs.edit()
+        editor.putString("Score", "$scoreData")
+        editor.commit()
     }
 
     fun sendScore(): kotlin.String? {
